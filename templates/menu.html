@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Menu{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Our Menu</h1>
+
+  <!-- Навигация по категориям -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link {% if not selected_category %}active{% endif %}"
+         href="{% url 'menu-page' %}">All</a>
+    </li>
+    {% for key,label in categories %}
+      <li class="nav-item">
+        <a class="nav-link {% if selected_category == key %}active{% endif %}"
+           href="?category={{ key }}">{{ label }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <div class="row">
+    {% for dish in dishes %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100">
+
+          <!-- Изображение с fallback на default.jpg -->
+          {% if dish.image %}
+            <img src="{{ dish.image.url }}"
+                 class="card-img-top"
+                 style="height:200px; object-fit:cover;"
+                 alt="{{ dish.name }}">
+          {% else %}
+            <img src="{% static 'img/default.jpg' %}"
+                 class="card-img-top"
+                 style="height:200px; object-fit:cover;"
+                 alt="{{ dish.name }}">
+          {% endif %}
+
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ dish.name }}</h5>
+            <p class="card-text">{{ dish.description }}</p>
+            <p class="card-text"><strong>${{ dish.price }}</strong></p>
+            <p class="card-text text-muted">Rating: {{ dish.average_rating }} ★</p>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'cart-add' dish.id %}">
+              {% csrf_token %}
+              <div class="input-group mb-2">
+                <input type="number" name="quantity" class="form-control" value="1" min="1" style="max-width: 70px;">
+                <button type="submit" class="btn btn-primary">Add</button>
+              </div>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-primary">Login to order</a>
+            {% endif %}
+
+          </div>
+
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

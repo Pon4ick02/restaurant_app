@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Archived Orders (Seller View)</h2>
+  {% if orders %}
+    <ul>
+      {% for order in orders %}
+        <li>
+          User: {{ order.user.username }} — Order #{{ order.id }} — {{ order.created_at|date:"Y-m-d H:i" }}
+          <ul>
+            {% for item in order.orderitem_set.all %}
+              <li>{{ item.dish.name }} (x{{ item.quantity }})</li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No archived orders found.</p>
+  {% endif %}
+</div>
+{% endblock %}

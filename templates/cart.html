@@ -1,0 +1,28 @@
+<!-- templates/cart.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Your Cart</h1>
+{% if cart_items %}
+    <ul class="list-group mb-4">
+        {% for item in cart_items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ item.dish.name }} (x{{ item.quantity }})
+                <form method="post" action="{% url 'cart-remove' item.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    <form method="post" action="{% url 'order-create' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Place Order</button>
+    </form>
+{% else %}
+    <p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

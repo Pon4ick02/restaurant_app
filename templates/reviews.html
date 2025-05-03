@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Reviews{% endblock %}
+{% block content %}
+  <h1 class="mb-4">Reviews</h1>
+
+  {# Форма добавления отзыва #}
+  {% if user.is_authenticated %}
+    <form method="post" class="mb-5">
+      {% csrf_token %}
+      <h2 class="h5 mb-3">Leave a Review</h2>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="dish" class="form-label">Dish</label>
+          <select name="dish" id="dish" class="form-select">
+            {% for dish in dishes %}
+              {% if dish.id in allowed_dish_ids %}
+                <option value="{{ dish.id }}">{{ dish.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-8">
+          <label for="text" class="form-label">Review Text</label>
+          <textarea name="text" id="text" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="col-md-2">
+          <label for="stars" class="form-label">Rating</label>
+          <input type="number" name="stars" id="stars" class="form-control" min="0" max="5" value="5">
+        </div>
+        <div class="col-md-4 form-check align-self-end">
+          <input type="checkbox" name="anonymous" class="form-check-input" id="anonCheck">
+          <label class="form-check-label" for="anonCheck">Anonymous</label>
+        </div>
+        <div class="col-md-2 align-self-end">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    <p><a href="{% url 'login' %}">Login</a> to submit a review.</p>
+  {% endif %}
+
+  {# Форма фильтрации по блюду #}
+  <form method="get" class="mb-4 row g-2 align-items-end">
+    <div class="col-auto">
+      <label for="filter_dish" class="form-label">Filter by Dish</label>
+      <select name="filter_dish" id="filter_dish" class="form-select">
+        <option value="" {% if not request.GET.filter_dish %}selected{% endif %}>All Dishes</option>
+        {% for dish in dishes %}
+          <option value="{{ dish.id }}"
+            {% if request.GET.filter_dish|stringformat:"s" == dish.id|stringformat:"s" %}selected{% endif %}>
+            {{ dish.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-secondary">Apply Filter</button>
+    </div>
+  </form>
+
+  <hr>
+
+  {# Список отзывов #}
+  <h3 class="mt-4 mb-3">{{ request.GET.filter_dish|default:"All Reviews" }}</h3>
+  {% for review in reviews %}
+    <div class="review-card border rounded p-3 mb-3">
+      <div class="d-flex justify-content-between">
+        <div>
+          <strong>{% if review.anonymous %}Anonymous{% else %}{{ review.user.username }}{% endif %}</strong>
+          — <small class="text-muted">{{ review.created_at|date:"Y-m-d H:i" }}</small>
+        </div>
+        {% if user.is_authenticated and user == review.user %}
+          <form method="post" action="{% url 'review-delete-html' review.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        {% elif user.is_superuser %}
+          <form method="post" action="{% url 'review-delete-html' review.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        {% endif %}
+
+          <form method="post" action="{% url 'review-delete-html' review.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        {% endfor %}
+      </div>
+      <div class="review-body mt-2">
+        <p>{{ review.text }}</p>
+        <p>Dish: <em>{{ review.dish.name }}</em> — {{ review.stars }}★</p>
+      </div>
+    </div>
+    <p>No reviews yet.</p>
+
+{% endblock %}
