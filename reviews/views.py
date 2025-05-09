@@ -5,10 +5,8 @@ from menu.models import Dish
 from orders.models import OrderItem
 
 def reviews_page(request):
-    # Все отзывы по убыванию даты
     reviews = Review.objects.all().order_by('-created_at')
 
-    # Фильтрация по блюду
     filter_id = request.GET.get('filter_dish')
     if filter_id:
         reviews = reviews.filter(order_item__dish_id=filter_id)
@@ -18,7 +16,6 @@ def reviews_page(request):
     allowed_order_items = []
     if request.user.is_authenticated:
         past_items = OrderItem.objects.filter(order__user=request.user)
-        # Только те, на которые ещё нет отзыва
         for item in past_items:
             if not Review.objects.filter(order_item=item).exists():
                 allowed_order_items.append(item)
@@ -34,7 +31,6 @@ def reviews_page(request):
             except OrderItem.DoesNotExist:
                 return redirect('reviews-page')
 
-            # Проверка: уже оставлен отзыв?
             if Review.objects.filter(order_item=order_item).exists():
                 return redirect('reviews-page')
 

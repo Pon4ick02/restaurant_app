@@ -31,22 +31,18 @@ def order_create_html(request):
     if request.method == 'POST':
         cart_items = CartItem.objects.filter(user=request.user)
         if cart_items.exists():
-            # Создаём заказ
             order = Order.objects.create(user=request.user)
 
-            # Переносим блюда из корзины в заказ
             for item in cart_items:
                 OrderItem.objects.create(
                     order=order,
                     dish=item.dish,
                     quantity=item.quantity
                 )
-
-            # Очищаем корзину
             cart_items.delete()
 
             return redirect('orders-page')
-    return redirect('cart-page')  # если не POST или корзина пуста
+    return redirect('cart-page')
 
 
 @login_required

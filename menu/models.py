@@ -29,12 +29,9 @@ class Dish(models.Model):
 
     @property
     def average_rating(self):
-        # Импортируем модель Review здесь, чтобы избежать циклической зависимости
         from reviews.models import Review
 
-        # Ставки по звёздам всех отзывов, привязанных к этому блюду через OrderItem
         result = Review.objects.filter(order_item__dish=self) \
             .aggregate(avg_stars=Avg('stars'))
         avg = result['avg_stars']
-        # Округляем до одного знака после запятой, либо 0, если отзывов нет
         return round(avg, 1) if avg is not None else 0
